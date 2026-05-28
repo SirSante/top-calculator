@@ -1,0 +1,23 @@
+.calculator {
+    width: 600px;
+    background-color: lightblue;
+}
+
+.calc-display {
+    padding: 30px;
+    border: solid 2px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+}
+
+.calc-buttons {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 10px;
+}
+
+.button {
+    width: calc((100% - 20px) / 3);
+    padding: 30px;
+    border-radius: 15px;
+}
