@@ -23,7 +23,7 @@
 
 .button {
     font-size: 22px;
-    width: calc((100% - 20px) / 3);
+    width: calc((100% - 30px) / 4);
     padding: 30px;
     border-radius: 15px;
     
@@ -32,4 +32,12 @@
 
 .button:hover {
     background-color: rgb(100, 100, 100);
+}
+
+.button-operator {
+    background-color: orange;
+}
+
+.button-operator:hover {
+    background-color: rgb(240, 130, 0);
 }
