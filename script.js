@@ -1,5 +1,7 @@
 function add(a,b) {
-    return a + b;
+    let sum = a + b;
+    updateDisplay(sum);
+    return sum;
 }
 
 function subtract(a,b) {
@@ -34,7 +36,43 @@ function operate(operator,a,b) {
     }
 }
 
-let num1;
-let num2;
-let operator;
+const calcDisplay = document.querySelector(".calc-display");
+const buttonElements = document.querySelector(".calc-buttons");
+
+buttonElements.addEventListener("click", (event) => {
+    let calcButtonElem = event.target;
+
+    if (calcButtonElem.classList.contains("digit")) {
+
+        return recordNumber(calcButtonElem.textContent);    
+
+    } else if (calcButtonElem.classList.contains('operator')) {
+        operator = calcButtonElem.textContent;
+        updateDisplay();
+        return;
+
+    } else if (calcButtonElem.classList.contains("equal-button")) {
+        return operate(operator,num1,num2);
+    }
+})
+
+
+function recordNumber(selectedNum) {
+    if (!operator) {
+        num1 += selectedNum;
+    } else {
+        num2 += selectedNum;
+    }
+    
+    updateDisplay();
+}
+
+function updateDisplay() {
+    calcDisplay.textContent = "";
+    calcDisplay.textContent += `${num1} ${operator} ${num2}`;
+}
+
+let num1 = "";
+let num2 = "";
+let operator = "";
 
