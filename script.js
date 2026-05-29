@@ -66,10 +66,14 @@ function updateDisplay(sum) {
 
     if (sum) {
         calcDisplay.textContent = sum;
-        num1 = "";
-        num2 = "";
-        operator = "";
+        resetValues();
     }
+}
+
+function resetValues() {
+    num1 = "";
+    num2 = "";
+    operator = "";
 }
 
 let num1 = "";
@@ -93,5 +97,9 @@ buttonElements.addEventListener("click", (event) => {
 
     } else if (calcButtonElem.classList.contains("equal-button")) {
         return operate(operator,num1,num2);
+
+    } else if (calcButtonElem.classList.contains('clear-button')) {
+        calcDisplay.textContent = "";
+        resetValues();
     }
 })
