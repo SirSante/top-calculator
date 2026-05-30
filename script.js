@@ -1,105 +1,119 @@
-function add(a,b) {
-    let sum = Number(a) + Number(b);
-    console.log(sum);
+const state = {
+    firstNumber: "",
+    secondNumber: "",
+    operator: "",
+    currentState: "ENTERING_FIRST_NUMBER",
+    justEvaluated: false,
+}
+
+const calcButtons = document.querySelector('.calc-buttons');
+const calcDisplay = document.querySelector(".calc-display");
+
+calcButtons.addEventListener("click",handleInput);
+
+function handleInput(selectedButton) {
+    const buttonValue = selectedButton.target.textContent;
     
-    updateDisplay(sum);
-    return sum;
-}
 
-function subtract(a,b) {
-    let sum = Number(a) - Number(b);
-    console.log(sum);
+    if (selectedButton.target.classList.contains("digit")) {
+        return handleDigit(buttonValue);
+    }
 
-    updateDisplay(sum)
-    return sum;
-}
+    if (selectedButton.target.classList.contains("operator")) {
+        return handleOperator(buttonValue);
+    }
 
-function multiply(a,b) {
-    let sum = Number(a) * Number(b);
-    console.log(sum);
+    if (selectedButton.target.classList.contains("equal-button")) {
+        return handleEquals();
+    }
 
-    updateDisplay(sum);
-    return sum;
-}
-
-function divide(a,b) {
-    let sum = Number(a) / Number(b);
-    console.log(sum);
-
-    updateDisplay(sum);
-    return sum;
-}
-
-function operate(operator,a,b) {
-    switch(operator) {
-        case "+":
-            add(a,b);
-            break; 
-
-        case "-": 
-            subtract(a,b);
-            break;
-
-        case "x":
-            multiply(a,b);
-            break;
-
-        case "/":
-            divide(a,b);
-            break;
+    if (selectedButton.target.classList.contains("clear-button")) {
+        return reset();
     }
 }
 
-function recordNumber(selectedNum) {
-    if (!operator) {
-        num1 += selectedNum;
-    } else {
-        num2 += selectedNum;
+function handleDigit(digit) {
+    if (state.justEvaluated) {
+        state.secondNumber = digit;
+        state.justEvaluated = false;
     }
     
+    else if (state.currentState === "ENTERING_FIRST_NUMBER") {
+        state.firstNumber += digit;
+        // console.log(state.firstNumber);
+    }
+
+    else if (state.currentState === "ENTERING_SECOND_NUMBER") {
+        state.secondNumber += digit;
+    }
+
     updateDisplay();
 }
 
-function updateDisplay(sum) {
-    calcDisplay.textContent = "";
-    calcDisplay.textContent += `${num1} ${operator} ${num2}`;
 
-    if (sum) {
-        calcDisplay.textContent = sum;
-        resetValues();
+// calc func: 1. Reset all vals except first. 2. Change currState to ENTERFIRST
+
+function handleOperator(operator) {
+    if (state.firstNumber && state.operator && state.secondNumber) {
+        calculate();
+        state.justEvaluated = false;
     }
+
+    state.operator = operator;
+    state.currentState = "ENTERING_SECOND_NUMBER";
+
+    updateDisplay();
 }
 
-function resetValues() {
-    num1 = "";
-    num2 = "";
-    operator = "";
+function handleEquals() {
+    if (!state.firstNumber || !state.secondNumber || !state.operator) return;
+    
+    calculate();
+
+    state.secondNumber = "";
+    state.operator = "";
+    state.justEvaluated = true;
+    state.currentState = "ENTERING_FIRST_NUMBER";
+
+    updateDisplay();
 }
 
-let num1 = "";
-let num2 = "";
-let operator = "";
-
-const calcDisplay = document.querySelector(".calc-display");
-const buttonElements = document.querySelector(".calc-buttons");
-
-buttonElements.addEventListener("click", (event) => {
-    let calcButtonElem = event.target;
-
-    if (calcButtonElem.classList.contains("digit")) {
-
-        return recordNumber(calcButtonElem.textContent);    
-
-    } else if (calcButtonElem.classList.contains('operator')) {
-        operator = calcButtonElem.textContent;
-        updateDisplay();
-        return;
-
-    } else if (calcButtonElem.classList.contains("equal-button")) {
-        return operate(operator,num1,num2);
-
-    } else if (calcButtonElem.classList.contains('clear-button')) {
-        calcDisplay.textContent = "";
-        resetValues();
+function calculate() {
+    const a = Number(state.firstNumber);
+    const b = Number(state.secondNumber);
+    const op = state.operator
+    let result; 
+    
+    switch(op) {
+        case "+":
+            result = a + b;
+            break;
+        case "-":
+            result = a - b;
+            break;
+        case "x":
+            result = a * b;
+            break;
+        case "/":
+            (b === 0) ? 
+            result = "Error" :
+            result = a / b;
+            break;
     }
-})
+
+    state.firstNumber = String(result);
+    console.log("tung");
+    
+}
+
+function updateDisplay() {
+    const {firstNumber,secondNumber,operator} = state;
+
+    calcDisplay.textContent = 
+        secondNumber
+            ? `${firstNumber} ${operator} ${secondNumber}`
+            : operator
+            ? `${firstNumber} ${operator}`
+            : `${firstNumber}`
+
+}
