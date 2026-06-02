@@ -1,105 +1,122 @@
-function add(a,b) {
-    let sum = Number(a) + Number(b);
-    console.log(sum);
-    
-    updateDisplay(sum);
-    return sum;
+const state = {
+    currInput: "",
+    expression: [],
+    justEvaluated: false,
 }
 
-function subtract(a,b) {
-    let sum = Number(a) - Number(b);
-    console.log(sum);
-
-    updateDisplay(sum)
-    return sum;
+const EVENTS = {
+    DIGIT: "DIGIT",
+    OPERATOR: "OPERATOR",
+    EQUALS: "EQUALS",
+    CLEAR: "CLEAR"
 }
 
-function multiply(a,b) {
-    let sum = Number(a) * Number(b);
-    console.log(sum);
-
-    updateDisplay(sum);
-    return sum;
+const OPERATION_RULES = {
+    "+": (a, b) => a + b,
+    "-": (a, b) => a - b,
+    "x": (a, b) => a * b,
+    "/": (a, b) => a / b,
 }
-
-function divide(a,b) {
-    let sum = Number(a) / Number(b);
-    console.log(sum);
-
-    updateDisplay(sum);
-    return sum;
-}
-
-function operate(operator,a,b) {
-    switch(operator) {
-        case "+":
-            add(a,b);
-            break; 
-
-        case "-": 
-            subtract(a,b);
-            break;
-
-        case "x":
-            multiply(a,b);
-            break;
-
-        case "/":
-            divide(a,b);
-            break;
-    }
-}
-
-function recordNumber(selectedNum) {
-    if (!operator) {
-        num1 += selectedNum;
-    } else {
-        num2 += selectedNum;
-    }
-    
-    updateDisplay();
-}
-
-function updateDisplay(sum) {
-    calcDisplay.textContent = "";
-    calcDisplay.textContent += `${num1} ${operator} ${num2}`;
-
-    if (sum) {
-        calcDisplay.textContent = sum;
-        resetValues();
-    }
-}
-
-function resetValues() {
-    num1 = "";
-    num2 = "";
-    operator = "";
-}
-
-let num1 = "";
-let num2 = "";
-let operator = "";
 
 const calcDisplay = document.querySelector(".calc-display");
-const buttonElements = document.querySelector(".calc-buttons");
+const calcButtons = document.querySelector(".calc-buttons");
 
-buttonElements.addEventListener("click", (event) => {
-    let calcButtonElem = event.target;
+calcButtons.addEventListener("click", (e) => {
+    const type = e.target.dataset.type;
+    const value = e.target.textContent;
 
-    if (calcButtonElem.classList.contains("digit")) {
-
-        return recordNumber(calcButtonElem.textContent);    
-
-    } else if (calcButtonElem.classList.contains('operator')) {
-        operator = calcButtonElem.textContent;
-        updateDisplay();
-        return;
-
-    } else if (calcButtonElem.classList.contains("equal-button")) {
-        return operate(operator,num1,num2);
-
-    } else if (calcButtonElem.classList.contains('clear-button')) {
-        calcDisplay.textContent = "";
-        resetValues();
+    if (EVENTS[type]) {
+        if (EVENTS[type] === EVENTS.DIGIT || EVENTS[type] === EVENTS.OPERATOR) {
+            dispatch({type: type, value: value})
+        }
+        else {
+            dispatch({type: type})
+        }
     }
-})
+
+});
+
+function dispatch(obj) {
+    switch (obj.type) {
+        case EVENTS.DIGIT:
+            handleDigit(obj.value);
+            break;
+
+        case EVENTS.OPERATOR:
+            handleOperator(obj.value);
+            break;
+
+        case EVENTS.EQUALS:
+            handleEquals();
+            break;
+
+        case EVENTS.CLEAR:
+            reset();
+            break;
+    }
+
+    renderDisplay();
+}
+
+function handleDigit(value) {
+    if (state.justEvaluated) {
+        state.currInput = value;
+        state.justEvaluated = false;
+        return;
+    }
+
+    // state.currInput === "" ?
+    !state.currInput ?
+        state.currInput = value : state.currInput += value;
+}
+
+function handleOperator(value) {
+    if (!state.currInput) return;
+
+    state.expression.push(state.currInput);
+    state.expression.push(value);
+
+    state.currInput = "";
+
+    /*
+    if (!state.justEvaluated) {
+        state.currInput = "";
+    }
+    */
+}
+
+function handleEquals() {
+    if (!state.currInput && state.currInput !== 0) return;
+    if (!state.expression?.length) return;
+
+    state.expression.push(state.currInput);
+    
+    state.currInput = calculate();
+    state.expression = [];
+    state.justEvaluated = true;
+}
+
+function calculate() {
+    let result = Number(state.expression[0]);
+
+    for (let i = 2; i<=state.expression.length; i += 2) {
+        let expressionNextNum = Number(state.expression[i]);
+        let expressionOperator = state.expression[i-1];
+
+        result = OPERATION_RULES[expressionOperator] (result, expressionNextNum);
+    }
+
+    return String(result);
+}
+
+function reset() {
+    state.currInput = "";
+    state.expression = [];
+    state.justEvaluated = false;
+}
+
+function renderDisplay() {
+    const cleanedExpression = state.expression.join(" ");
+
+    calcDisplay.textContent = `${cleanedExpression} ${state.currInput}`;
+}
